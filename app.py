@@ -3,4 +3,4 @@ def add(a, b):
 
 
 def greet(name):
-    return f"Hello1, {name}!"
+    return f"Hello, {name}!"
