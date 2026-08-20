@@ -3,24 +3,34 @@ version: 0.2
 phases:
   install:
     commands:
-      - pip install flake8 pytest
+      - "echo Installing Python dependencies..."
+      - "python --version"
+      - "pip install -r requirements.txt"
 
   pre_build:
     commands:
-      - echo "Running lint..."
-      - flake8 app.py
-      - echo "Running unit tests..."
-      - pytest test_app.py -v
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $ECR_URI
+      - "echo Running lint..."
+      - "flake8 app.py"
+      - "echo Lint completed successfully."
+      - "echo Running unit tests..."
+      - "pytest test_app.py -v"
+      - "echo Unit tests completed successfully."
 
   build:
     commands:
-      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - docker build -t $ECR_URI:$IMAGE_TAG .
-      - docker push $ECR_URI:$IMAGE_TAG
-      - docker tag $ECR_URI:$IMAGE_TAG $ECR_URI:latest
-      - docker push $ECR_URI:latest
-
+      - "echo Packaging Python application..."
+      - "mkdir -p package"
+      - "cp app.py package/"
+      - "cp test_app.py package/"
+      - "cp requirements.txt package/"
+      - "echo Creating ZIP artifact..."
+      - "zip -r devops-lab1.zip package/"
+  
   post_build:
     commands:
-      - echo "Build complete. Image tag $IMAGE_TAG pushed to ECR."
+      - "echo Build completed successfully."
+      - "echo Commit SHA is $CODEBUILD_RESOLVED_SOURCE_VERSION"
+
+artifacts:
+  files:
+    - "devops-lab1.zip"
